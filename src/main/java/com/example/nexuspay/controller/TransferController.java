@@ -18,7 +18,7 @@ public class TransferController {
 
     // 1. TRANSFER API (CORE)
     @PostMapping("/transfer")
-    public String transfer(@RequestBody Map<String, Object> request) {
+    public String transfer(@RequestBody Map<String, Object> request) throws InterruptedException {
         String from = (String) request.get("from");
         String to = (String) request.get("to");
         Double amount = Double.valueOf(request.get("amount").toString());

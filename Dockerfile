@@ -1,6 +1,6 @@
 # ----- BUILD STAGE -----
 
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+FROM maven@sha256:8d63d4c1902cb12d9e79a70671b18ebe26358cb592561af33ca1808f00d935cb AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN mvn clean package -DskipTests
 
 # ----- RUN STAGE -----
 
-FROM gcr.io/distroless/java21-debian12:nonroot AS runtime
+FROM gcr.io/distroless/java21-debian12@sha256:7e37784d94dccbf5ccb195c73b295f5ad00cd266512dfbac12eb9c3c28f8077d AS runtime
 
 WORKDIR /app
 

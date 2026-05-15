@@ -1,0 +1,69 @@
+services:
+
+  # DATABASE
+  database:
+    image: postgres:16
+    container_name: nexuspay-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5444:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./users-data:/var/lib/postgresql/data
+    networks:
+      - nexuspay_net
+
+  # MIGRATION SERVICE
+  migrate:
+    container_name: nexuspay-migrate
+    image: postgres:16
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./src/main/resources/db/migration/V1__create_transaction_table.sql:/schema.sql:ro
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "Waiting for DB..."
+        until pg_isready -h database -U ${DB_USERNAME}; do
+          sleep 2
+        done
+        echo "Running migrations..."
+        psql -h database -U ${DB_USERNAME} -d ${DB_NAME} -f /schema.sql
+        echo "Migration completed"
+    networks:
+      - nexuspay_net
+
+
+  # API SERVICE
+  api:
+    build: .
+    container_name: nexuspay-api
+    image: nsahil992/nexuspay:${VERSION}
+    env_file:
+      .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8081"
+    networks:
+      - nexuspay_net
+
+networks:
+  nexuspay_net:
+
+volumes:
+  users-data:

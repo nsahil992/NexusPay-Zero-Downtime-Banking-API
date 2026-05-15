@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.Counter;
 
+import java.math.BigDecimal;
+
 @Service
 public class TransferService {
     private final Counter successCounter;
@@ -34,18 +36,22 @@ public class TransferService {
                     .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
             // Validate Balance
-            if (sender.getBalance() < amount) {
+            if (sender.getBalance().compareTo(BigDecimal.valueOf(amount)) < 0) {
                 throw new RuntimeException("Insufficient balance");
             }
 
             // Deduct from sender
-            sender.setBalance(sender.getBalance() - amount);
+            sender.setBalance(
+                    sender.getBalance().subtract(BigDecimal.valueOf(amount))
+            );
 
             // Simulate real-world delay
             Thread.sleep(2000);
 
             // Add to receiver
-            receiver.setBalance(receiver.getBalance() + amount);
+            receiver.setBalance(
+                    receiver.getBalance().add(BigDecimal.valueOf(amount))
+            );
 
             userRepository.save(sender);
             userRepository.save(receiver);

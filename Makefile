@@ -1,7 +1,7 @@
 .PHONY: build run test clean package docker-build docker-run docker-push
 
 APP_NAME = nexuspay
-VERSION ?= 1.0.0
+VERSION ?= 1.0.1
 
 DOCKER_USERNAME ?= nsahil992
 IMAGE = $(DOCKER_USERNAME)/$(APP_NAME):$(VERSION)
@@ -35,6 +35,9 @@ docker-build:
 
 docker-run:
 	docker run --env-file .env -p 8081:8081 $(IMAGE)
+
+docker-tag:
+	docker tag $(IMAGE) $(IMAGE)
 
 docker-push:
 	docker push $(IMAGE)

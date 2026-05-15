@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,11 +42,11 @@ class NexuspayApplicationTests {
 
         User sender = new User();
         sender.setAccountNumber("ACC1001");
-        sender.setBalance(10000.0);
+        sender.setBalance(BigDecimal.valueOf(10000.0));
 
         User receiver = new User();
         receiver.setAccountNumber("ACC1002");
-        receiver.setBalance(5000.0);
+        receiver.setBalance(BigDecimal.valueOf(5000.0));
 
         userRepository.save(sender);
         userRepository.save(receiver);

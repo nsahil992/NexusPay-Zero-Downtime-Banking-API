@@ -1,0 +1,55 @@
+name: Nexuspay CI Pipeline
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - feature/ci
+    paths:
+      - "pom.xml"
+      - "Makefile"
+      - "src/**"
+      - "Dockerfile"
+
+  pull_request:
+    branches:
+      - feature/ci
+    paths:
+      - "pom.xml"
+      - "Makefile"
+      - "src/**"
+      - "Dockerfile"
+
+jobs:
+  ci:
+    name: Build, Test, Lint, Push Docker Image
+    runs-on: self-hosted
+
+    env:
+      VERSION: ${{ secrets.SEMVER_VERSION }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build API
+        run: make build
+
+      - name: Run Tests
+        run: make test
+
+      - name: Lint Code
+        run: make lint
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
+
+      - name: Docker Build, Test and Push
+        run: |
+          - make docker-test
+          - make docker-build VERSION=${{ env.VERSION }}
+          - make docker-push VERSION=${{ env.VERSION }}
